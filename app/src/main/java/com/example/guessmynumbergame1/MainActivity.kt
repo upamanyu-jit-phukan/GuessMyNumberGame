@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.guessmynumbergame1.ui.theme.GuessMyNumberGame1Theme
+import kotlin.random.Random
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +53,40 @@ fun GuessMyNumber(modifier: Modifier = Modifier) {
 //    var numberOfTrials : Int
     var inputValue by remember { mutableStateOf("") }
     var Expanded by remember { mutableStateOf(false) }
-    var numTrials = remember { mutableStateOf("") }
+    var Expanded2 by remember { mutableStateOf(false) }
+    var numTrials by remember { mutableStateOf(0) }
+    var numDivider by remember { mutableStateOf(3) }
+    var output by remember { mutableStateOf("") }
+    var count by remember { mutableStateOf(1) }
+
+    fun generate() {
+        output = ""
+        count = 1
+        val x = 100/numDivider
+        var randomNumber = Random.nextInt(1, x+1)
+        randomNumber *= numDivider
+        return randomNumber
+    }
+
+    fun test(n: Int) {
+        val playerGuess = inputValue.toIntOrNull()
+        if(playerGuess == null) {
+            output = "Please enter valid number"
+        }
+        if (count-1==numTrials) {
+            output = "Better luck next time. You have used all your chances for this game"
+            count = 1
+        }
+        else if(inputValue==n) {
+            output = "Congratulations!! Your were able to guess the " +
+                    "number correctly in $count attempts"
+        }
+        else {
+            count++
+            val attemptsLeft = numTrials - count + 1
+            output = "Try again. You have $attemptsLeft chances left"
+        }
+    }
 
     Column (
         modifier = Modifier.fillMaxSize(),
@@ -60,10 +94,14 @@ fun GuessMyNumber(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val context = LocalContext.current
+        Text("Number of trials left: $numTrials",
+            style = MaterialTheme.typography.headlineLarge
+        )
         OutlinedTextField(value = inputValue.value, onValueChange = { it ->
-            inputValue = it
+            var inputValueString = inputValue.toString
+            inputValueString = it
         },
-            label = {Text("Enter value")})
+            label = {Text("Guess the number?")})
         Box {
             Button(onClick = { Expanded = true }) {
                 Text("Select Difficulty")
@@ -71,23 +109,53 @@ fun GuessMyNumber(modifier: Modifier = Modifier) {
                     "Arrow Down")
             }
             DropdownMenu(expanded = Expanded, onDismissRequest = { Expanded = false }) {
-                DropdownMenuItem(text = {Text("Level 1")},
+                DropdownMenuItem(text = {Text("Level 1: N%10 == 0 && 1<=N<=100")},
                     onClick = {
                         Expanded = true
-                        numTrials.value = "10"
+                        numDivider = 10
 
                     })
-                DropdownMenuItem(text = {Text("Level 2")},
+                DropdownMenuItem(text = {Text("Level 2: N%5 == 0 && 1<=N<=100")},
                     onClick = {
                         Expanded = true
-                        numTrials.value = "10"
+                        numDivider = 5
 
                     })
-                DropdownMenuItem(text = {Text("Level 3")},
+                DropdownMenuItem(text = {Text("Level 3: N%3 == 0 && 1<=N<=100")},
                     onClick = {
                         Expanded = true
-                        numTrials.value = "10"
+                        numDivider = 3
 
+                    })
+            }
+            Button(onClick = { Expanded = true }) {
+                Text("Select Number of Trials")
+                androidx.compose.material3.Icon( imageVector = Icons.Default.ArrowDropDown,
+                    "Arrow Down")
+            }
+            DropdownMenu(expanded = Expanded, onDismissRequest = { Expanded2 = false }) {
+                DropdownMenuItem(text = { Text("Max. 5 trials") },
+                    onClick = {
+                        Expanded2 = false
+                        numTrials = 5
+//                        test()
+                        val n = generate()
+                        test(n)
+                    })
+                DropdownMenuItem(text = { Text("Max. 7 trials") },
+                    onClick = {
+                        Expanded2 = false
+                        numTrials = 7
+//                        test()
+                        val n = generate()
+                        test(n)
+                    })
+                DropdownMenuItem(text = { Text("Max. 10 trials") },
+                    onClick = {
+                        Expanded2 = false
+                        numTrials = 10
+                        val n = generate()
+                        test(n)
                     })
             }
         }
